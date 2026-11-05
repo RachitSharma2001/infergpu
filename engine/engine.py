@@ -80,9 +80,18 @@ class Scheduler:
     def construct_batch(self):
         return self.waiting_queue
 
+
+
 class ModelRunner:
     def forward_pass(self, requests):
         results = []
         for _ in requests:
             results.append(Result([840]))
         return results 
+
+
+class Qwen306B:
+    def __init__(self):
+        pass
+
+    

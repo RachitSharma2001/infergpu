@@ -4,6 +4,8 @@ import queue
 from transformers import AutoTokenizer
 import torch
 import threading
+from block_manager import BlockManager, Scheduler
+from model_runner import ModelRunner
 
 MODEL_TO_TOKENIZER = {
     "gpt2": AutoTokenizer.from_pretrained("gpt2")

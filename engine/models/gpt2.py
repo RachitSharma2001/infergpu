@@ -40,7 +40,6 @@ class GPT2Model:
     # dimension. request_ids says which request each packed token belongs
     # to; position_ids is that token's position within its own request.
     def forward(self, token_ids, request_ids, position_ids, write_slots, p, new_req_ids, tot_slots, return_intermediates=False):
-        print("forward pass!")
         # e.g. token_ids = [3, 121, 9]. This produces one row per token id:
         # [vector 3 in token embedding layer], [vector 121 ...], [vector 9 ...]
         token_embedding = self.token_embedding_layer(token_ids)

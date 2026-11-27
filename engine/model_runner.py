@@ -2,6 +2,8 @@ from itertools import chain
 import torch
 import random
 import os
+from models.gpt2 import GPT2Model
+from kvcache.cache import Pool 
 
 os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
 
@@ -126,36 +128,6 @@ class ModelRunner:
               self.tot_slots_gpu[:len(tot_slots)],
           )
 
-
-
-      # #### remove #####
-
-      # print("replaying -------------------------------")
-      # print(self.token_ids_gpu[:len(token_ids)])
-      # print(self.request_ids_gpu[:len(request_ids)])
-      # print(self.position_ids_gpu[:len(position_ids)])
-      # print(self.write_slots_gpu[:len(write_slots)])
-      # print(self.p_gpu[:len(p)])
-      # print(self.new_req_ids_gpu[:len(new_req_ids)])
-      # print(self.tot_slots_gpu[:len(tot_slots)])
-      # print("self logits gpu now: ", self.logits_gpu)
-      # print("------------------------------------------")
-      # self.cuda_graph = None
-      # # print("token ids gpu: ", self.token_ids_gpu[:len(token_ids)])
-      # # print("request ids gpu: ", self.request_ids_gpu[:len(request_ids)])
-      # # print("position ids gpu: ", self.position_ids_gpu[:len(position_ids)])
-      # with torch.device("cuda"):
-      #   self.logits_gpu = self.gpt2_model.forward(
-      #       self.token_ids_gpu[:len(token_ids)],
-      #       self.request_ids_gpu[:len(request_ids)],
-      #       self.position_ids_gpu[:len(position_ids)],
-      #       self.write_slots_gpu[:len(write_slots)],
-      #       self.p_gpu[:len(p)],
-      #       self.new_req_ids_gpu[:len(new_req_ids)],
-      #       self.tot_slots_gpu[:len(tot_slots)],
-      #   )
-
-      # #################
 
       logits_cpu = self.logits_gpu.to("cpu")
       probs = torch.softmax(logits_cpu, dim=-1)

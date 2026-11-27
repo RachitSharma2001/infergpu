@@ -1,18 +1,26 @@
 import time
-from engine.engine import Engine
+from engine import Engine
+import threading
 
-engine = Engine("Qwen3-0.6B", 10)
+engine = Engine("gpt2", batch_size=32, max_response_size=500)
+
 engine.start_background()
-prompt = "Explain how a KV cache works."
 
-q = engine.add(prompt)
 
-while True:
-    r = q.get()
-    if r == "done":
+def collect(q, lis):
+  while True:
+      r = q.get()
+      if r == "done":
+        print(lis)
         break
-    print(r)
+      lis.append(r)
 
-print("done")
+for _ in range(100):
+  prompt = "What is pizza?"
+  q = engine.add(prompt)
 
-time.sleep(10)
+
+  l1 = []
+  t1 = threading.Thread(target=collect, args=(q, l1))
+  t1.start()
+  t1.join()

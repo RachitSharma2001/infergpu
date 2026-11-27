@@ -9,7 +9,6 @@ os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
 
 class ModelRunner:
     def __init__(self, model_name):
-      # todo use the actual parameters of gpt2
       self.max_size = 1000
       self.kvcache = Pool(12, self.max_size, 12, 64)
       if model_name != "gpt2":

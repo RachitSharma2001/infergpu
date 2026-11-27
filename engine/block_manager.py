@@ -15,17 +15,6 @@ class BlockManager:
   def give_back_slots(self, slots):
     self.available_slots.extend(slots)
 
-# class Request:
-#     def __init__(self, prompt, input_token_ids):
-#         self.prompt = prompt
-#         self.total_token_ids = input_token_ids
-#         self.current_token_ids = input_token_ids
-#         self.rid = random.randrange(100000)
-#         self.queue = queue.Queue()
-#         self.num_run_iterations = 0
-#         self.read_slots = []
-#         self.write_slots = []
-
 class Batch:
     def __init__(self, batch, is_prefill):
       self.batch = batch

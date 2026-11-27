@@ -1,23 +1,42 @@
 import random
 import time
-import queue 
+import queue
 from transformers import AutoTokenizer
 import torch
-import threading 
+import threading
 
 MODEL_TO_TOKENIZER = {
-    "Qwen3-0.6B": AutoTokenizer.from_pretrained("Qwen/Qwen3-0.6B")
+    "gpt2": AutoTokenizer.from_pretrained("gpt2")
 }
 
 MODEL_TO_EOS = {
-    "Qwen3-0.6B": 151645
+    "gpt2": 151645
 }
 
+import random
+import queue
+
+class Result:
+    def __init__(self, output_tokens):
+        self.output_tokens = output_tokens
+
+class Request:
+    def __init__(self, prompt, input_token_ids):
+        self.prompt = prompt
+        self.total_token_ids = input_token_ids
+        self.current_token_ids = input_token_ids
+        self.rid = random.randrange(100000)
+        self.queue = queue.Queue()
+        self.num_run_iterations = 0
+        self.read_slots = []
+        self.write_slots = []
+
 class Engine:
-    def __init__(self, model_name, max_response_size=100):
+    def __init__(self, model_name, batch_size = 1, max_response_size=10):
         self.model_name = model_name
-        self.scheduler = Scheduler()
-        self.model_runner = ModelRunner()
+        block_manager = BlockManager(1000)
+        self.scheduler = Scheduler(batch_size, block_manager)
+        self.model_runner = ModelRunner(model_name)
         self.tokenizer = MODEL_TO_TOKENIZER[model_name]
         self.eos = MODEL_TO_EOS[model_name]
         self.max_response_size = max_response_size
@@ -37,16 +56,16 @@ class Engine:
 
     def step(self):
         batch = self.scheduler.construct_batch()
-        if len(batch) == 0:
+        if len(batch.batch) == 0:
             return 0
-        results = self.model_runner.forward_pass(batch)
-        for req, res in zip(batch, results):
+        results = self.model_runner.forward_pass(batch.batch, batch.is_prefill)
+        for req, res in zip(batch.batch, results):
             req.queue.put(self.tokenizer.batch_decode(res.output_tokens))
             if req.num_run_iterations == self.max_response_size or res.output_tokens[-1] == self.eos:
                 req.queue.put("done")
                 self.scheduler.remove_request(req)
             req.num_run_iterations += 1
-        return len(batch)
+        return len(batch.batch)
 
     def manage_steps(self):
         while True:
@@ -55,43 +74,3 @@ class Engine:
                 time.sleep(0.5)
 
 
-class Result:
-    def __init__(self, output_tokens):
-        self.output_tokens = output_tokens
-
-class Request:
-    def __init__(self, prompt, input_token_ids):
-        self.prompt = prompt 
-        self.input_token_ids = input_token_ids
-        self.rid = f"{random.randrange(100000)}"
-        self.queue = queue.Queue()
-        self.num_run_iterations = 0
-
-class Scheduler:
-    def __init__(self):
-        self.waiting_queue = []
-
-    def add_new_request(self, req):
-        self.waiting_queue.append(req)
-
-    def remove_request(self, req):
-        self.waiting_queue.remove(req)
-
-    def construct_batch(self):
-        return self.waiting_queue
-
-
-
-class ModelRunner:
-    def forward_pass(self, requests):
-        results = []
-        for _ in requests:
-            results.append(Result([840]))
-        return results 
-
-
-class Qwen306B:
-    def __init__(self):
-        pass
-
-    
